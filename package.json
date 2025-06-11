@@ -1,0 +1,44 @@
+{
+  "name": "aetheris",
+  "version": "1.0.0",
+  "description": "Typescript backend for the aetheris android app",
+  "homepage": "https://github.com/malloudev/aetherisTS#readme",
+  "scripts": {
+    "prepublishOnly": "bash ./build.sh && echo 'Build completed, uploading..'",
+    "test": "node ./node_modules/ts-node/dist/bin.js ./lib/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/malloudev/aetherisTS.git"
+  },
+  "keywords": [
+    "botdesigner",
+    "aoijs",
+    "discord"
+  ],
+  "author": "malloudev",
+  "license": "APACHE-2.0",
+  "exports": {
+    ".": {
+      "import": "./dist/mjs/bundle.mjs",
+      "require": "./dist/cjs/bundle.cjs",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./**/*": {
+      "import": "./dist/mjs",
+      "require": "./dist/cjs",
+      "types": "./dist/types"
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/malloudev/aetherisTS/issues"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "ws": "^8.18.2"
+  }
+}
