@@ -22,18 +22,35 @@ export class Shard extends EventEmitter {
       assert(typeof (websocketUrl || this._gatewayUrl) != undefined, 'No Url available to connect to discord');
       
       this._payloadQueue = new RateLimiter(2000, 4);
-      this._socket = new WebSocket(websocketUrl ?? this._gatewayUrl)
-         .once('close', () => this._socketOnceClose)
-         .once('error', () => this._socketOnceError)
-         .once('open', () => this._socketOnceOpen)
-         .on('message', this._socketOnMessage);
+      const ws = this._socket = new WebSocket(websocketUrl ?? this._gatewayUrl);
+      
+      ws.once('close', () => this._socketOnceClose);
+      ws.once('error', () => this._socketOnceError);
+      ws.once('open', () => this._socketOnceOpen);
+      ws.on('message', this._socketOnMessage);
    }
   
-   public async sendPayload(payload: GatewaySendPayload): Promise<void> {
-      
+   public sendPayload(payload: GatewaySendPayload, skipQueue?: boolean): Promise<void> {
+      return this._payloadQueue.enqueue((): void => {
+         
+      }, skipQueue);
    }
    
-   private _socketOnMessage(data: Buffer): void {
+   private async _socketOnMessage(data: Buffer): Promise<void> {
+      const { t:event, s:sequence, op, d:data }: GatewayReceivePayload = await this._decodeMessage(data);
+      
+      switch(op) {
+         case(GatewayOpcodes.Dispatch): 
+            this.emit('dispatch', this, event, data);
+         break;
+      }
+   }
+   
+   private async _decodeMessage(data: Buffer | string): Promise<GatewayReceivePayload> {
+      if(typeof data === 'string') {
+         return <GatewayReceivePayload>JSON.parse(data);
+      }
+      
       
    }
   
