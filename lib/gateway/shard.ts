@@ -5,12 +5,16 @@ import { WebSocket } from 'ws';
 import { assert } from 'assert';
 
 export class Shard extends EventEmitter {
-   private readonly _gatewayUrl: string;
    private _payloadQueue: RateLimiter;
    private _socket: WebSocket;
    private _token: string;
    
-  constructor() {
+  constructor(
+     private readonly _gatewayUrl: string,
+     private readonly _token: string,
+     private readonly _intents: number
+   ) {
+      super();
       this._socketOnMessage = this._socketOnMessage.bind(this);
       this._socketOnceClose = this._socketOnceClose.bind(this);
       this._socketOnceError = this._socketOnceError.bind(this);
@@ -24,15 +28,19 @@ export class Shard extends EventEmitter {
       this._payloadQueue = new RateLimiter(2000, 4);
       const ws = this._socket = new WebSocket(websocketUrl ?? this._gatewayUrl);
       
-      ws.once('close', () => this._socketOnceClose);
-      ws.once('error', () => this._socketOnceError);
-      ws.once('open', () => this._socketOnceOpen);
+      ws.once('close', this._socketOnceClose);
+      ws.once('error', this._socketOnceError);
+      ws.once('open', this._socketOnceOpen);
       ws.on('message', this._socketOnMessage);
    }
-  
-   public sendPayload(payload: GatewaySendPayload, skipQueue?: boolean): Promise<void> {
-      return this._payloadQueue.enqueue((): void => {
+   
+   public send(payload: GatewaySendPayload, skipQueue?: boolean): Promise<void> {
+      return this._payloadQueue.enqueue(async (): Promise<void> => {
+         if(this._socket?.readyState !== WebSocket.OPEN) {
+            await new Promise((res) => this._socket?.once('open', res));
+         }
          
+         this._socket.send(JSON.stringify(payload));
       }, skipQueue);
    }
    
