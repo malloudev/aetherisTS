@@ -5,7 +5,8 @@
   "homepage": "https://github.com/malloudev/aetherisTS#readme",
   "scripts": {
     "prepublishOnly": "npm i --no-bin-links && bash ./build.sh",
-    "test": "node ./node_modules/ts-node/dist/bin.js ./lib/index.ts"
+    "tsnode": "node ./node_modules/ts-node/dist/bin.js ./lib/index.ts",
+    "test": "bash ./build.sh && node ./dist/cjs/index.js"
   },
   "repository": {
     "type": "git",
