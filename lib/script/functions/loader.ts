@@ -23,7 +23,7 @@ const loadDirectory = async (dirname: string): void => {
 
 if(!functionNames.size) {
    void async function(): void {
-      const loaderPath: string = filedirnameFromCaller();
+      const loaderPath: string = filedirnameFromCaller()[1];
       const promiseAccumulator: Promise[] = [];
       
       for(const folder of await readdir(loaderPath)) {
